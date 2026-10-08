@@ -1,0 +1,11 @@
+packages:
+  - apps/improver
+  - apps/ui
+
+# Dependency build scripts pnpm may run. esbuild verifies its platform binary;
+# the others are transitive dependencies of Flue's provider SDKs and are not needed here.
+allowBuilds:
+  esbuild: true
+  "@google/genai": false
+  core-js-pure: false
+  protobufjs: false

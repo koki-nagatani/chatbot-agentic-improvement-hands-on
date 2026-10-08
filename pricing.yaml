@@ -1,0 +1,13 @@
+# OpenAI prices in USD per 1M tokens, used to estimate the cost of chatbot turns and evals.
+# Chat models: from the Pi model catalog bundled with Flue (@earendil-works/pi-ai 0.87.1),
+# which mirrors OpenAI's published pricing. Embeddings: OpenAI's published pricing.
+# A dated model id (e.g. gpt-5.5-2026-04-23) matches the longest key it starts with.
+models:
+  gpt-5.6-luna: { input: 0.2, cached_input: 0.02, output: 1.2 }
+  gpt-5.6-terra: { input: 2.0, cached_input: 0.2, output: 12.0 }
+  gpt-5.6-sol: { input: 4.0, cached_input: 0.4, output: 20.0 }
+  gpt-5.5: { input: 5.0, cached_input: 0.5, output: 30.0 }
+  gpt-5.4-mini: { input: 0.75, cached_input: 0.075, output: 4.5 }
+  gpt-4.1-mini: { input: 0.4, cached_input: 0.1, output: 1.6 }
+  text-embedding-3-small: { input: 0.02, cached_input: 0.02, output: 0 }
+  text-embedding-3-large: { input: 0.13, cached_input: 0.13, output: 0 }

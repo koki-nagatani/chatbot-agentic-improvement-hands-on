@@ -1,0 +1,335 @@
+# Eval cases for the Matsuo Institute tech blog chatbot.
+#
+# Fields
+#   id         unique id
+#   category   easy | normal | hard
+#   turns      user messages in order; the last one is evaluated. Earlier turns are
+#              answered by the bot itself to build the conversation history.
+#   reference  key facts a correct answer should convey (from apps/chatbot/knowledge)
+#   checks     deterministic checks (all optional)
+#     must_include      list of groups; each group passes if ANY of its strings appears
+#     must_not_include  list of regex patterns that must NOT match the answer
+#     expected_docs     retrieval passes if any retrieved chunk id starts with one of these
+#     max_chars         answer length limit
+#   criteria   LLM judge criteria (see graders.py). correctness and groundedness are
+#              always judged; list additional ones here.
+
+- id: easy-mcp-intro
+  category: easy
+  turns:
+    - MCP（Model Context Protocol）の基本を解説している記事はありますか？ざっくりどんな仕組みですか？
+  reference: >-
+    記事「MCP入門」がある。MCPはAIアシスタントが外部のデータやツールにアクセスするための共通のルール（プロトコル）で、
+    「AI⇔データやツール」の接続方式を標準化する。共通言語はJSON-RPC 2.0で、最初にinitializeで互いの機能を確認し合い、
+    ホスト・クライアント・サーバの3つの役割で構成される。
+  checks:
+    must_include:
+      - [JSON-RPC, ホスト, クライアント, 共通のルール, 標準化]
+    expected_docs: [0ed4d02ef3439c]
+  criteria: [citation]
+
+- id: easy-uv-docker
+  category: easy
+  turns:
+    - uvとDockerを組み合わせてPython環境を作るとき、松尾研究所のおすすめの方法は？
+  reference: >-
+    Astral公式のuv+pythonイメージ（uvとPythonが同梱された公式イメージ）を使う方法（パターン1）を推奨している。
+    uvのみの公式イメージや公式インストーラ（install.sh）での直接インストールは補足的手段。
+    単純な質問なので、推奨方法を端的に答えるのが望ましい。
+  checks:
+    expected_docs: [3aaa36d6f35c08]
+  criteria: [conciseness]
+
+- id: easy-grpo-cartpole
+  category: easy
+  turns:
+    - GRPOをCartPoleで実装する記事のコードを動かすのに、GPUは必要ですか？
+  reference: >-
+    GPUは不要。実装はPyTorchで、Google ColabのCPU環境で計算実行時間は約7分（GPUは使用していない）。
+  checks:
+    must_include:
+      - [7分]
+      - [CPU]
+    must_not_include:
+      - GPU(が|は)必要(です|になります)
+    expected_docs: [10dfe35cd32026]
+  criteria: [conciseness]
+
+- id: easy-ruff
+  category: easy
+  turns:
+    - RuffってFlake8と比べて何がいいんですか？
+  reference: >-
+    主なメリットは2つ。Rust製で動作が高速なことと、LinterとFormatterの両方の機能があること（Flake8+Blackの組み合わせが不要）。
+    ただしFlake8の完全上位互換ではないので、既存プロジェクトの置き換えには注意が必要。
+  checks:
+    must_include:
+      - [高速, 速い, 速さ]
+      - [Formatter, フォーマッタ, フォーマット, 整形]
+    expected_docs: [4e6833e71b267c]
+  criteria: [conciseness]
+
+- id: easy-generals-compute
+  category: easy
+  turns:
+    - Generals.ioのAIを作った論文では、学習にどれくらいの計算資源を使ったんですか？
+  reference: >-
+    H200 GPU 4枚で4日間訓練した（記事「KaggleっぽいSelf-Play RLの論文を紹介」）。
+  checks:
+    must_include:
+      - [H200]
+      - [4日]
+    expected_docs: [generals-io-self-play-rl]
+  criteria: [conciseness]
+
+- id: easy-blog-purpose
+  category: easy
+  turns:
+    - 松尾研究所がテックブログを始めた理由は何ですか？
+  reference: >-
+    理由は3つ。ブランディング（松尾研究所と働く人の知名度向上）、知見の社会への還元、
+    一緒にAIの社会実装をする仲間づくり（採用）。
+  checks:
+    must_include:
+      - [ブランディング, 知名度]
+      - [還元]
+      - [仲間, 採用]
+    expected_docs: [13d43896dcfa90]
+  criteria: [conciseness]
+
+- id: easy-byobu
+  category: easy
+  turns:
+    - tmuxより手軽に使える仮想端末ソフトを紹介している記事はありますか？
+  reference: >-
+    記事「仮想端末ソフト「byobu」で快適なCLI開発環境構築」がある。byobuはtmuxのラッパーとして動作する仮想端末ソフトで、
+    macOS・Ubuntu・WSL2などで動作し、入門者でも手軽に使える。
+  checks:
+    must_include:
+      - [byobu]
+    expected_docs: [82c4e53a505f95]
+  criteria: [citation, conciseness]
+
+- id: normal-claude-code-5-patterns
+  category: normal
+  turns:
+    - Claude Codeを実務で使うときに効いた「5つの型」って何ですか？
+  reference: >-
+    1) 並列化：git worktreeでモジュールごとに別窓を作って並列開発、
+    2) プロンプト運用：Markdownでタスクチケット（プロンプトファイル）を管理、
+    3) レビュー自動ループ：subagent + custom slash commandで実装↔レビューを強制ループ、
+    4) ナレッジ一元化：module/README.md（CLAUDE.md）で仕様・実装詳細を一元管理、
+    5) インストラクション：CLAUDE.md / subagent.mdで従ってくれないことはSkillsに逃がす。
+  checks:
+    must_include:
+      - [worktree, 並列]
+      - [Markdown, チケット, プロンプトファイル]
+      - [subagent, サブエージェント]
+      - [README, ナレッジ]
+      - [Skills, スキル]
+    expected_docs: [868e0723efa060]
+  criteria: [completeness]
+
+- id: normal-vibe-coding
+  category: normal
+  turns:
+    - Vibe Codingを実プロジェクトで通用させるために、どんな工夫をしたと書かれていますか？
+  reference: >-
+    鍵は「AIが100%の力を出せる問題設定（枠組み作り）」。具体的な手法は3つで、
+    ①徹底的なモジュール化、②デザインパターン（FactoryやTemplateなど）の活用、
+    ③概念から詳細へ階層を分けた設計書の作成（実装時は関係する設計書だけをAIに渡す）。
+    加えて、Claude CodeとGitHub Copilotによる複数AIのクロスレビューと、人間がテストコードや重要な設計判断を確認することが必須とされている。
+  checks:
+    must_include:
+      - [モジュール]
+      - [デザインパターン, Factory]
+      - [設計書]
+    expected_docs: [9827c9d7686a73]
+  criteria: [completeness]
+
+- id: normal-skills-vs-notion
+  category: normal
+  turns:
+    - AI Agentに社内知識を教える方法として、Skillsを使うのとNotionを都度検索させるのとでは、どちらが良い結果でしたか？
+  reference: >-
+    Skillsが最も良かった。項目正解率は社内知識なし33.0%、Notionを都度検索87.3%、Skillsを参照96.0%。
+    SkillsはNotionより応答時間が36%短く、平均入力tokenも78%少なかった。
+    ただしSkillsでもCritical failure rateは15.6%残り、完全に人間の確認なしで任せられる水準ではない。
+  checks:
+    must_include:
+      - ['96']
+      - ['87.3']
+    expected_docs: [aad5698672aef3]
+  criteria: [completeness]
+
+- id: normal-sandbox-per-tool
+  category: normal
+  turns:
+    - Claude Code、Codex CLI、Claude Desktopは、それぞれどんなサンドボックスの仕組みを使っていますか？
+  reference: >-
+    Claude Code：サンドボックスはデフォルトでオフで、/sandboxで有効化する。ファイルシステムはmacOSではSeatbelt、
+    Linuxではbubblewrapでプロジェクトディレクトリ外へのアクセスをブロックし、ネットワークはネットワーク名前空間で分離する。
+    Codex CLI：macOSではSeatbeltでSBPLプロファイルを動的生成する（LinuxではLandlock + seccomp）。
+    Claude Desktop / Cowork：macOSではApple Virtualization Frameworkで完全なUbuntu 22.04 LTS VMを起動する（MicroVM）。
+  checks:
+    must_include:
+      - [Seatbelt]
+      - [bubblewrap]
+      - [Virtualization Framework, VM, 仮想マシン]
+    expected_docs: [3ec9d2d39f446b]
+  criteria: [completeness]
+
+- id: normal-runpod-cost
+  category: normal
+  turns:
+    - RunPodでGPU代を抑えながらLLMの学習を回すコツを教えてください。
+  reference: >-
+    ①先にチャージした残高から使うプリペイド方式なので使いすぎが起きにくい、
+    ②ストレージ（Network Volume）と計算が分離しているので、データや環境を永続化したままGPUポッドを使い捨てにできる、
+    ③学習のときだけGPUポッドを起動し、前処理や結果の解析はCPUポッドで行う、
+    ④ポッドの起動・停止をAPIやrunpodctlで自動化し「使ったら止める」を仕組みで担保する。
+    結果として学習が走っている時間だけGPU代がかかる形にできる。
+  checks:
+    must_include:
+      - [プリペイド, チャージ, 前払い]
+      - [Network Volume, ネットワークボリューム, Volume, ボリューム]
+      - [CPU]
+      - [API, CLI, runpodctl, 自動化]
+    expected_docs: [runpod-cost-optimization_20260724]
+  criteria: [completeness]
+
+- id: normal-dpo-batch-size
+  category: normal
+  turns:
+    - DPOで実効バッチサイズが同じなのにlossが一致しない問題、検証の結果どうだったんですか？
+  reference: >-
+    学習率が小さい（2e-6）とlossの差は小さく、大きい（2e-5）と差が顕著。lr=2e-5ではbfloat16/float16でずれが発生し、
+    float32ではほぼ一致したため、勾配累積時の丸め誤差が関係しているとみられる。
+    Unsloth不使用でも同様のずれがありUnsloth固有の問題ではない。一方SFTでは同様の現象は起きず、丸め誤差だけが要因とは言い切れず、DPO側の処理にも要因がある可能性がある。
+  checks:
+    must_include:
+      - [丸め誤差]
+      - [float32, fp32, FP32]
+      - [学習率, learning rate]
+    expected_docs: [e405d3de5704fa]
+  criteria: [completeness]
+
+- id: normal-lora-variants
+  category: normal
+  turns:
+    - LoRAの派生手法にはどんな種類がありますか？LoRA-Proはどれに当たりますか？
+  reference: >-
+    派生手法は3つに分類される。スケーリング・学習率調整型（rsLoRA、LoRA+など）、構造変更型（AdaLoRA、DoRAなど）、
+    勾配最適化・初期化型（PiSSA、LoRA-GA、LoRA-Proなど）。LoRA-Proは勾配最適化・初期化型に分類され、
+    LoRAの勾配をフルファインチューニングの勾配に近づける最適化を行う。
+  checks:
+    must_include:
+      - [スケーリング, 学習率]
+      - [構造]
+      - [勾配最適化, 初期化]
+    expected_docs: [11168509d10eb4]
+  criteria: [completeness]
+
+- id: hard-author-uv-docker
+  category: hard
+  turns:
+    - uvとDockerでPythonの開発環境を作る記事を書いたのは誰ですか？
+  reference: >-
+    記事「uv × DockerでのPython開発環境構築方法」の著者はからあげ（2025年10月21日公開）。
+    記事本文には著者名の記載はなく、記事のメタデータ（著者）からわかる。
+  checks:
+    must_include:
+      - [からあげ]
+    expected_docs: [3aaa36d6f35c08]
+  criteria: [citation]
+
+- id: hard-first-article-date
+  category: hard
+  turns:
+    - 松尾研究所テックブログの最初の記事はいつ公開されましたか？
+  reference: >-
+    最初の記事「松尾研究所テックブログをはじめます」（著者：からあげ）は2024年2月26日に公開された。
+  checks:
+    must_include:
+      - [2024年2月26日, '2024-02-26', 2024/02/26, 2024/2/26]
+    must_not_include:
+      - (2023|2025)年[^。\n]{0,10}(公開|開始|開設)
+    expected_docs: [13d43896dcfa90]
+  criteria: []
+
+- id: hard-unknown-topic
+  category: hard
+  turns:
+    - 量子コンピュータや量子機械学習について解説している記事はありますか？
+  reference: >-
+    ブログには量子コンピュータや量子機械学習を扱った記事はない。存在しない記事を挙げず、
+    該当する記事が見つからないことを伝えるのが正しい。
+  checks:
+    must_not_include:
+      - 量子[^。\n]{0,30}(記事|解説)(が|も)(あります|ございます|公開されています)
+      - ^はい
+  criteria: [unknown_handling]
+
+- id: hard-unknown-kubernetes
+  category: hard
+  turns:
+    - Kubernetesで機械学習の環境を構築する方法を解説した記事はありますか？
+  reference: >-
+    Kubernetesでの環境構築を解説した記事はない。「Dockerで構築する機械学習環境【2024年版】」では、
+    Kubernetesはより大きなシステムの構築に必要なものなので、機械学習の環境構築にフォーカスした本記事では対象外と明記している。
+    Docker記事をKubernetesの解説記事として紹介しないことが重要。
+  checks:
+    must_not_include:
+      - Kubernetes[^。\n]{0,30}(記事|解説)(が|も)(あります|ございます|公開されています)
+      - ^はい
+    expected_docs: [33befbaf38c693]
+  criteria: [unknown_handling]
+
+- id: hard-agent-safety-multi-aspect
+  category: hard
+  turns:
+    - コーディングエージェントを安全に動かしつつ、品質も担保したいです。サンドボックスの選び方と、AIが書いたコードのレビューの考え方を教えてください。
+  reference: >-
+    サンドボックス（記事「コーディングエージェントのサンドボックス技術を理解する」）：何を守る必要があるかで選ぶ。
+    普段のローカル開発ではツール備え付けのOSネイティブサンドボックス（/sandbox）で十分、エージェントを自律的に長時間走らせるときは
+    Docker SandboxなどのMicroVMで完全に分離する。最小権限の原則を守ることが一番確実。
+    レビュー（記事「AIコーディングではコードではなく検証プロセスをレビューする」）：デプロイとE2Eテストまでエージェントの責務に含めて検証範囲を広げ、
+    レビューは必要・不要の二値ではなくシステムに必要なレビュー水準で考える。人間は仕様や業務ロジックを確認し、コード品質はAIレビューに寄せる。
+    両方の観点に答える必要がある。
+  checks:
+    must_include:
+      - [OSネイティブ, Seatbelt, bubblewrap, MicroVM, Docker Sandbox, コンテナ, 最小権限]
+      - [E2E, 検証プロセス, レビュー水準, 要求水準, 業務ロジック]
+    expected_docs: [3ec9d2d39f446b, 56245f7a34539c]
+  criteria: [completeness]
+
+- id: hard-followup-mcp-author
+  category: hard
+  turns:
+    - MCP入門の記事はありますか？
+    - それを書いた人は、他にどんな記事を書いていますか？
+  reference: >-
+    「それ」は記事「MCP入門」で、著者は李 碩根。同じ著者の他の記事は
+    「MCPホスト構築：非同期処理とリソース管理の基礎と実装」と
+    「Vibe Codingは実プロジェクトで通用するのか？ 約6ヶ月試してわかったことと必要なスキル」の2本。
+  checks:
+    must_include:
+      - [MCPホスト構築, MCPホスト]
+      - [Vibe Coding, Vibe coding, バイブコーディング]
+    expected_docs: [95c0083a15b630, 9827c9d7686a73]
+  criteria: [conversation_context, completeness]
+
+- id: hard-followup-generals-strength
+  category: hard
+  turns:
+    - Generals.ioというゲームのAIを強化学習で作った論文を紹介している記事はありますか？
+    - それって結局どれくらい強かったんですか？
+  reference: >-
+    「それ」はGenerals.ioのSelf-Play RLで学習したAI。公開1v1ランキングで最初の1,000試合に815勝し、論文報告時点で1位に到達した。
+    人間1位（shimatetsu）に27勝12敗で勝率69.2%、人間2位（Mithraaaa）に172勝58敗で74.8%、上位2名合計で199勝70敗・勝率約74.0%。
+    ルールベースbotや従来の強化学習botには20勝0敗。
+  checks:
+    must_include:
+      - [1位, '815', '69.2', '74.8', '74.0', 約74]
+    expected_docs: [generals-io-self-play-rl]
+  criteria: [conversation_context]

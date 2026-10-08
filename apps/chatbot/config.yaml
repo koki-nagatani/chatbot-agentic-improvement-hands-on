@@ -1,0 +1,15 @@
+# Passed as-is to chat.completions.create (model + any extra parameters)
+llm:
+  model: gpt-5.6-luna
+  reasoning_effort: none
+  temperature: 0
+
+embedding:
+  model: text-embedding-3-small
+
+chunking:
+  chunk_size: 800
+  chunk_overlap: 100
+
+retrieval:
+  top_k: 3

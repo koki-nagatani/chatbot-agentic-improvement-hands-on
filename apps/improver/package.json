@@ -1,0 +1,23 @@
+{
+  "name": "improver",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "improve": "flue run src/agents/improver.ts --env ../../.env",
+    "dev": "vite dev",
+    "check:types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@earendil-works/pi-ai": "0.87.1",
+    "@flue/runtime": "^2.2.2",
+    "hono": "^4.13.13",
+    "valibot": "^1.5.0"
+  },
+  "devDependencies": {
+    "@flue/cli": "^2.2.2",
+    "@flue/vite": "^2.2.2",
+    "@types/node": "^26.6.4",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.3"
+  }
+}

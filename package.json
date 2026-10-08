@@ -1,0 +1,26 @@
+{
+  "name": "chatbot-agentic-improvement-hands-on",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.9.1",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "scripts": {
+    "postinstall": "uv sync",
+    "knowledge": "uv run python scripts/fetch_knowledge.py",
+    "ingest": "uv run python apps/chatbot/ingest.py",
+    "dev": "concurrently --names chatbot,improver,ui --prefix-colors blue,magenta,green \"pnpm run dev:chatbot\" \"pnpm --filter improver dev\" \"pnpm --filter ui dev\"",
+    "dev:chatbot": "uv run uvicorn server:app --app-dir apps/chatbot --port 8000 --reload --reload-dir apps/chatbot",
+    "chat": "uv run python apps/chatbot/run.py --show-context",
+    "eval": "uv run python evals/run_eval.py --compare latest",
+    "eval:baseline": "uv run python evals/run_eval.py --label baseline",
+    "eval:compare": "uv run python evals/compare.py",
+    "improve": "pnpm --filter improver improve",
+    "lint": "uv run ruff check . && uv run ruff format --check . && pnpm -r check:types",
+    "format": "uv run ruff check --fix . && uv run ruff format ."
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}

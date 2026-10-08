@@ -1,0 +1,18 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+node_modules/
+.next/
+dist/
+apps/chatbot/index/
+workspace/traces/*
+!workspace/traces/.gitkeep
+evals/results/*
+!evals/results/.gitkeep
+.DS_Store
+# Fetched at setup time by `make knowledge` (scripts/fetch_knowledge.py)
+apps/chatbot/knowledge/*.md
+
+# Flue conversation store (apps/improver/src/db.ts)
+apps/improver/.data/
